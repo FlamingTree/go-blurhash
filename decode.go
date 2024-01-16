@@ -6,7 +6,7 @@ import (
 	"image/draw"
 	"math"
 
-	"github.com/bbrks/go-blurhash/base83"
+	"github.com/FlamingTree/go-blurhash/base83"
 )
 
 // Components returns the X and Y components of a blurhash.

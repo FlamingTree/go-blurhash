@@ -6,7 +6,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/bbrks/go-blurhash/base83"
+	"github.com/FlamingTeee/go-blurhash/base83"
 )
 
 const (
