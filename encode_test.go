@@ -2,6 +2,7 @@ package blurhash_test
 
 import (
 	"image"
+	_ "image/jpeg"
 	"os"
 	"path/filepath"
 	"testing"

@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/matryer/is"
@@ -42,10 +43,11 @@ func TestDecode(t *testing.T) {
 		t.Run(test.hash, func(t *testing.T) {
 			is := is.New(t)
 
-			img, err := blurhash.Decode(test.hash, 32, 32, 1)
+			img, err := blurhash.Decode(test.hash, 1080, 1349, 1)
 			is.NoErr(err)
 
-			err = png.Encode(ioutil.Discard, img)
+			f, _ := os.Create("fixtures/1_blur.jpg")
+			err = png.Encode(f, img)
 			is.NoErr(err)
 		})
 	}

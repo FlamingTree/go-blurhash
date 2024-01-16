@@ -1,6 +1,7 @@
 package blurhash
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -71,6 +72,7 @@ func Encode(xComponents, yComponents int, img image.Image) (hash string, err err
 		quantisedMaximumValue := math.Max(0, math.Min(82, math.Floor(actualMaximumValue*166-0.5)))
 		maximumValue = (quantisedMaximumValue + 1) / 166
 		str, err := base83.Encode(int(quantisedMaximumValue), 1)
+		fmt.Printf("quantisedMaximumValue: %f, maximumValue: %f\n", quantisedMaximumValue, maximumValue)
 		if err != nil {
 			return "", err
 		}
@@ -86,6 +88,7 @@ func Encode(xComponents, yComponents int, img image.Image) (hash string, err err
 
 	dc := factors[0][0]
 	str, err := base83.Encode(encodeDC(dc[0], dc[1], dc[2]), 4)
+	fmt.Printf("DC: %s, %f, %f, %f\n", str, dc[0], dc[1], dc[2])
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +99,9 @@ func Encode(xComponents, yComponents int, img image.Image) (hash string, err err
 			if y == 0 && x == 0 {
 				continue
 			}
-			str, err := base83.Encode(encodeAC(factors[y][x][0], factors[y][x][1], factors[y][x][2], maximumValue), 2)
+			// str, err := base83.Encode(encodeAC(factors[y][x][0], factors[y][x][1], factors[y][x][2], maximumValue), 2)
+			str, err := base83.Encode(encodeAC(factors[y][x][0], factors[y][x][1], factors[y][x][2], maximumValue), 3)
+			fmt.Printf("AC[%d][%d]: %f, %f, %f\n", y, x, factors[y][x][0], factors[y][x][1], factors[y][x][2])
 			if err != nil {
 				return "", err
 			}
@@ -112,11 +117,17 @@ func encodeDC(r, g, b float64) int {
 }
 
 func encodeAC(r, g, b, maximumValue float64) int {
-	quantR := math.Max(0, math.Min(18, math.Floor(signPow(r/maximumValue, 0.5)*9+9.5)))
-	quantG := math.Max(0, math.Min(18, math.Floor(signPow(g/maximumValue, 0.5)*9+9.5)))
-	quantB := math.Max(0, math.Min(18, math.Floor(signPow(b/maximumValue, 0.5)*9+9.5)))
+	// quantR := math.Max(0, math.Min(18, math.Floor(signPow(r/maximumValue, 0.5)*9+9.5)))
+	// quantG := math.Max(0, math.Min(18, math.Floor(signPow(g/maximumValue, 0.5)*9+9.5)))
+	// quantB := math.Max(0, math.Min(18, math.Floor(signPow(b/maximumValue, 0.5)*9+9.5)))
 
-	return int(quantR*19*19 + quantG*19 + quantB)
+	// return int(quantR*19*19 + quantG*19 + quantB)
+
+	quantR := math.Max(0, math.Min(82, math.Floor(signPow(r/maximumValue, 0.5)*41+41.5)))
+	quantG := math.Max(0, math.Min(82, math.Floor(signPow(g/maximumValue, 0.5)*41+41.5)))
+	quantB := math.Max(0, math.Min(82, math.Floor(signPow(b/maximumValue, 0.5)*41+41.5)))
+
+	return int(quantR*83*83 + quantG*83 + quantB)
 }
 
 func multiplyBasisFunction(xComponents, yComponents int, img image.Image) [3]float64 {

@@ -1,6 +1,7 @@
 package blurhash
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -10,19 +11,32 @@ import (
 )
 
 // Components returns the X and Y components of a blurhash.
+// func Components(hash string) (x, y int, err error) {
+// 	sizeFlag, err := base83.Decode(string(hash[0]))
+// 	if err != nil {
+// 		return 0, 0, err
+// 	}
+
+// 	x = (sizeFlag % 9) + 1
+// 	y = (sizeFlag / 9) + 1
+
+// 	expectedLength := 4 + 2*x*y
+// 	actualLength := len(hash)
+// 	if expectedLength != actualLength {
+// 		return 0, 0, lengthError(expectedLength, actualLength)
+// 	}
+
+//		return x, y, nil
+//	}
 func Components(hash string) (x, y int, err error) {
-	sizeFlag, err := base83.Decode(string(hash[0]))
+	x, err = base83.Decode(string(hash[0]))
 	if err != nil {
 		return 0, 0, err
 	}
 
-	x = (sizeFlag % 9) + 1
-	y = (sizeFlag / 9) + 1
-
-	expectedLength := 4 + 2*x*y
-	actualLength := len(hash)
-	if expectedLength != actualLength {
-		return 0, 0, lengthError(expectedLength, actualLength)
+	y, err = base83.Decode(string(hash[1]))
+	if err != nil {
+		return 0, 0, err
 	}
 
 	return x, y, nil
@@ -52,27 +66,42 @@ func DecodeDraw(dst draw.Image, hash string, punch float64) error {
 		return err
 	}
 
-	quantisedMaximumValue, err := base83.Decode(string(hash[1]))
+	// quantisedMaximumValue, err := base83.Decode(string(hash[1]))
+	quantisedMaximumValue, err := base83.Decode(string(hash[2]))
 	if err != nil {
 		return err
 	}
 	maximumValue := float64(quantisedMaximumValue+1) / 166
+	fmt.Printf("quantisedMaximumValue: %d, maximumValue: %f\n", quantisedMaximumValue, maximumValue)
 
 	// for each component
 	colors := make([][3]float64, numX*numY)
 	for i := range colors {
 		if i == 0 {
-			val, err := base83.Decode(hash[2:6])
+			// val, err := base83.Decode(hash[2:6])
+			val, err := base83.Decode(hash[3:7])
 			if err != nil {
 				return err
 			}
 			colors[i] = decodeDC(val)
+			fmt.Println(fmt.Sprintf("DC: %s, %f, %f, %f", hash[3:7], colors[i][0], colors[i][1], colors[i][2]))
 		} else {
-			val, err := base83.Decode(hash[4+i*2 : 6+i*2])
+			// val, err := base83.Decode(hash[4+i*2 : 6+i*2])
+			val, err := base83.Decode(hash[4+i*3 : 7+i*3])
 			if err != nil {
 				return err
 			}
 			colors[i] = decodeAC(float64(val), maximumValue*punch)
+		}
+	}
+
+	for y := 0; y < numY; y++ {
+		for x := 0; x < numX; x++ {
+			if y == 0 && x == 0 {
+				continue
+			}
+			dc := colors[x+y*numX]
+			fmt.Printf("AC[%d][%d]: %f, %f, %f\n", y, x, dc[0], dc[1], dc[2])
 		}
 	}
 
@@ -120,12 +149,21 @@ func decodeDC(val int) (c [3]float64) {
 	return c
 }
 
+//	func decodeAC(val, maximumValue float64) (c [3]float64) {
+//		quantR := math.Floor(val / (19 * 19))
+//		quantG := math.Mod(math.Floor(val/19), 19)
+//		quantB := math.Mod(val, 19)
+//		c[0] = signPow((quantR-9)/9, 2.0) * maximumValue
+//		c[1] = signPow((quantG-9)/9, 2.0) * maximumValue
+//		c[2] = signPow((quantB-9)/9, 2.0) * maximumValue
+//		return c
+//	}
 func decodeAC(val, maximumValue float64) (c [3]float64) {
-	quantR := math.Floor(val / (19 * 19))
-	quantG := math.Mod(math.Floor(val/19), 19)
-	quantB := math.Mod(val, 19)
-	c[0] = signPow((quantR-9)/9, 2.0) * maximumValue
-	c[1] = signPow((quantG-9)/9, 2.0) * maximumValue
-	c[2] = signPow((quantB-9)/9, 2.0) * maximumValue
+	quantR := math.Floor(val / (83 * 83))
+	quantG := math.Mod(math.Floor(val/83), 83)
+	quantB := math.Mod(val, 83)
+	c[0] = signPow((quantR-41)/41, 2.0) * maximumValue
+	c[1] = signPow((quantG-41)/41, 2.0) * maximumValue
+	c[2] = signPow((quantB-41)/41, 2.0) * maximumValue
 	return c
 }
