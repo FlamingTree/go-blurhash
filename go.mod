@@ -1,4 +1,4 @@
-module github.com/FlamingTeee/go-blurhash
+module github.com/FlamingTree/go-blurhash
 
 go 1.12
 

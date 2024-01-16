@@ -8,7 +8,7 @@ import (
 
 	"github.com/matryer/is"
 
-	"github.com/FlamingTeee/go-blurhash"
+	"github.com/FlamingTree/go-blurhash"
 )
 
 func TestDecodeRGBA(t *testing.T) {
