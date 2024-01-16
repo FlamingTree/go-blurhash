@@ -32,8 +32,11 @@ func TestEncode(t *testing.T) {
 			is.True(img != nil) // image should not be nil
 
 			hash, err := blurhash.Encode(test.xComp, test.yComp, img)
-			is.NoErr(err)             // error hashing test fixture image
-			is.Equal(hash, test.hash) // blurhash mismatch
+			is.NoErr(err) // error hashing test fixture image
+			// is.Equal(hash, test.hash) // blurhash mismatch
+			if hash != test.hash {
+				t.Errorf("hash mismatch: got %s, want %s", hash, test.hash)
+			}
 		})
 	}
 }

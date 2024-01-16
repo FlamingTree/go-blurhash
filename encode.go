@@ -96,7 +96,7 @@ func Encode(xComponents, yComponents int, img image.Image) (hash string, err err
 			if y == 0 && x == 0 {
 				continue
 			}
-			str, err := base83.Encode(encodeAC(factors[y][x][0], factors[y][x][1], factors[y][x][2], maximumValue), 3)
+			str, err := base83.Encode(encodeAC(factors[y][x][0], factors[y][x][1], factors[y][x][2], maximumValue), 2)
 			if err != nil {
 				return "", err
 			}
@@ -112,12 +112,11 @@ func encodeDC(r, g, b float64) int {
 }
 
 func encodeAC(r, g, b, maximumValue float64) int {
-	// quantR := math.Max(0, math.Min(18, math.Floor(signPow(r/maximumValue, 0.5)*9+9.5)))
-	// quantG := math.Max(0, math.Min(18, math.Floor(signPow(g/maximumValue, 0.5)*9+9.5)))
-	// quantB := math.Max(0, math.Min(18, math.Floor(signPow(b/maximumValue, 0.5)*9+9.5)))
+	quantR := math.Max(0, math.Min(18, math.Floor(signPow(r/maximumValue, 0.5)*9+9.5)))
+	quantG := math.Max(0, math.Min(18, math.Floor(signPow(g/maximumValue, 0.5)*9+9.5)))
+	quantB := math.Max(0, math.Min(18, math.Floor(signPow(b/maximumValue, 0.5)*9+9.5)))
 
-	// return int(quantR*19*19 + quantG*19 + quantB)
-	return int(r*19*19 + g*19 + b)
+	return int(quantR*19*19 + quantG*19 + quantB)
 }
 
 func multiplyBasisFunction(xComponents, yComponents int, img image.Image) [3]float64 {
